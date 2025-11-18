@@ -376,9 +376,66 @@ export default function JobDetail() {
           </div>
         </div>
 
-        {/* === РЕКРУТЕРСЬКИЙ БЛОК: Заявки на цю вакансію === */}
+
+
+
+        {/* Sidebar */}
+        <div className="lg:col-span-1">
+          <div className="sticky top-20">
+            <div className="rounded-2xl border bg-white p-5 space-y-4">
+              <h3 className="font-semibold">Умови</h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">Зарплата</span>
+                  <span className="font-medium">
+                    {(job.salary_min ?? '—')} – {(job.salary_max ?? '—')} {job.salary_token || 'USDC'}
+                  </span>
+                </div>
+                {job.salary_usd_equivalent ? (
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">≈ в USD</span>
+                    <span className="font-medium">${job.salary_usd_equivalent}</span>
+                  </div>
+                ) : null}
+                {job.skills_required ? (
+                  <div className="pt-2">
+                    <div className="text-gray-600 mb-1">Ключові навички</div>
+                    <div className="flex flex-wrap gap-2">
+                      {String(job.skills_required)
+                        .split(',')
+                        .map((s, i) => (
+                          <span key={i} className="rounded bg-gray-100 px-2 py-1 text-xs">
+                            {s.trim()}
+                          </span>
+                        ))}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="hidden lg:block mt-4">
+              <ApplyPanel
+                job={job}
+                canApply={canApply}
+                hasApplied={hasApplied}
+                applying={applying}
+                coverLetter={coverLetter}
+                setCoverLetter={setCoverLetter}
+                resumeUrl={resumeUrl}
+                setResumeUrl={setResumeUrl}
+                submitApplication={submitApplication}
+                onLogin={() => navigate('/login', { state: { redirectTo: `/jobs/${id}` } })}
+                role={me?.role}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+              {/* === РЕКРУТЕРСЬКИЙ БЛОК: Заявки на цю вакансію === */}
         {apps !== null && isAuthenticated() && me?.role === 'recruiter' && (
-          <div className="rounded-2xl border bg-white p-6">
+          <div className="rounded-2xl border bg-white p-6 mt-8">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-lg font-semibold">Заявки на вакансію</h3>
               {appsLoading && <span className="text-sm text-gray-500">Оновлення…</span>}
@@ -448,61 +505,6 @@ export default function JobDetail() {
             )}
           </div>
         )}
-
-
-        {/* Sidebar */}
-        <div className="lg:col-span-1">
-          <div className="sticky top-20">
-            <div className="rounded-2xl border bg-white p-5 space-y-4">
-              <h3 className="font-semibold">Умови</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Зарплата</span>
-                  <span className="font-medium">
-                    {(job.salary_min ?? '—')} – {(job.salary_max ?? '—')} {job.salary_token || 'USDC'}
-                  </span>
-                </div>
-                {job.salary_usd_equivalent ? (
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">≈ в USD</span>
-                    <span className="font-medium">${job.salary_usd_equivalent}</span>
-                  </div>
-                ) : null}
-                {job.skills_required ? (
-                  <div className="pt-2">
-                    <div className="text-gray-600 mb-1">Ключові навички</div>
-                    <div className="flex flex-wrap gap-2">
-                      {String(job.skills_required)
-                        .split(',')
-                        .map((s, i) => (
-                          <span key={i} className="rounded bg-gray-100 px-2 py-1 text-xs">
-                            {s.trim()}
-                          </span>
-                        ))}
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-            </div>
-
-            <div className="hidden lg:block mt-4">
-              <ApplyPanel
-                job={job}
-                canApply={canApply}
-                hasApplied={hasApplied}
-                applying={applying}
-                coverLetter={coverLetter}
-                setCoverLetter={setCoverLetter}
-                resumeUrl={resumeUrl}
-                setResumeUrl={setResumeUrl}
-                submitApplication={submitApplication}
-                onLogin={() => navigate('/login', { state: { redirectTo: `/jobs/${id}` } })}
-                role={me?.role}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
       {/* Modal: recruiter notes */}
       {editingNoteId !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
