@@ -5,9 +5,10 @@ import Toast from '../components/Toast'
 import { Link, useNavigate } from 'react-router-dom'
 import { apiBase } from '../config'
 import { saveTokens, saveUser } from '../lib/auth'
-import { signInWithWallet } from '../lib/siwe';
 import { Wallet2 } from 'lucide-react';
 import GoogleButton from '../components/GoogleButton'
+import { SiweMessage } from 'siwe'
+import { ethers } from 'ethers'
 
 export default function LoginPage({ onAuth }) {
   const [email, setEmail] = useState('')
@@ -16,6 +17,87 @@ export default function LoginPage({ onAuth }) {
   const [submitting, setSubmitting] = useState(false)
   const [toast, setToast] = useState({ message: '', type: 'success' })
   const navigate = useNavigate()
+
+  
+  async function loginWithWallet() {
+    try {
+      if (!window.ethereum) {
+        setToast({ message: 'Не знайдено крипто-гаманець (MetaMask, Rabby тощо)', type: 'error' });
+        return;
+      }
+
+      setSubmitting(true);
+
+      // 1. Попросити доступ до акаунта
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const accounts = await provider.send('eth_requestAccounts', []);
+      const address = ethers.getAddress(accounts[0]);  // <- робить EIP-55 checksum
+
+      // 2. Отримати nonce з бекенду (з сесією!)
+      const nonceRes = await fetch(`${apiBase}/auth/siwe/nonce`, {
+        method: 'GET',
+        credentials: 'include', // обовʼязково для Flask session
+      });
+      const nonceData = await nonceRes.json();
+      if (!nonceRes.ok || !nonceData.ok) {
+        throw new Error(nonceData.message || 'Не вдалося отримати nonce');
+      }
+      const nonce = nonceData.nonce;
+
+      // 3. Зібрати SIWE message
+      const network = await provider.getNetwork();
+      const chainId = Number(network.chainId);
+      const domain = window.location.hostname;
+      const origin = window.location.origin;
+
+      const siweMessage = new SiweMessage({
+        domain,
+        address,
+        statement: 'Sign in to web3jobs with your wallet',
+        uri: origin,
+        version: '1',
+        chainId,
+        nonce,
+      });
+
+      const messageToSign = siweMessage.prepareMessage();
+
+      // 4. Підписати повідомлення
+      const signer = await provider.getSigner();
+      const signature = await signer.signMessage(messageToSign);
+
+      // 5. Відправити на бекенд для верифікації + отримати JWT
+      const verifyRes = await fetch(`${apiBase}/auth/siwe/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // на всяк випадок, щоб сесія збіглася
+        body: JSON.stringify({
+          message: messageToSign,
+          signature,
+          role: 'user', // або 'recruiter', якщо це форма для рекрутера
+        }),
+      });
+
+      const data = await verifyRes.json();
+      if (!verifyRes.ok || !data.ok) {
+        throw new Error(data.message || 'Не вдалося увійти через гаманець');
+      }
+
+      // 6. Зберегти JWT і користувача — так само, як при звичайному логіні
+      saveTokens({ access_token: data.access_token, refresh_token: data.refresh_token });
+      saveUser(data.user);
+
+      if (onAuth) onAuth(data.user);
+
+      setToast({ message: 'Увійдено через гаманець!', type: 'success' });
+      setTimeout(() => navigate('/'), 600);
+    } catch (err) {
+      console.error(err);
+      setToast({ message: err.message, type: 'error' });
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
 
   async function onSubmit(e) {
@@ -43,47 +125,6 @@ export default function LoginPage({ onAuth }) {
       setSubmitting(false)
     }
   }
-
-    async function onWalletLogin() {
-    try {
-      setSubmitting(true)
-      
-      // Check if MetaMask is installed
-      if (!window.ethereum) {
-        throw new Error('MetaMask не встановлено. Будь ласка, встановіть MetaMask або інший Web3 гаманець.')
-      }
-
-      setToast({ message: 'Підключення до гаманця...', type: 'success' })
-
-      // Use the signInWithWallet helper from siwe library
-      const result = await signInWithWallet()
-
-      if (!result.ok) {
-        throw new Error(result.message || 'Помилка автентифікації через гаманець')
-      }
-
-      // Save tokens and user data
-      saveTokens({ 
-        access_token: result.access_token, 
-        refresh_token: result.refresh_token 
-      })
-      saveUser(result.user)
-
-      if (onAuth) onAuth(result.user)
-
-      setToast({ message: 'Успішний вхід через гаманець!', type: 'success' })
-      setTimeout(() => navigate('/'), 600)
-    } catch (err) {
-      console.error('Wallet login error:', err)
-      setToast({ 
-        message: err.message || 'Помилка підключення гаманця', 
-        type: 'error' 
-      })
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
 
   return (
     <div className="mx-auto max-w-lg">
@@ -119,9 +160,19 @@ export default function LoginPage({ onAuth }) {
             setTimeout(() => navigate('/'), 300);
           }}
         />
-        /* <button type="button" disa className="btn btn-outline w-full" onClick={onWalletLogin}>
+        
+        /* <button type="button" className="btn btn-outline w-full">
   <Wallet2 className="mr-2 h-4 w-4" /> Увійти через MetaMask / гаманець
 </button> */}
+
+<button
+          type="button"
+          className="btn btn-outline w-full mt-2"
+          onClick={loginWithWallet}
+          disabled={submitting}
+        >
+          <Wallet2 className="mr-2 h-4 w-4" /> Увійти через MetaMask / гаманець
+        </button>
 
         <p className="text-center text-sm text-gray-500">
           Немає акаунту? <Link to="/register" className="underline">Зареєструватися</Link>
