@@ -31,7 +31,7 @@ export default function GoogleButton({ onSuccess, desiredRole = 'user', classNam
       text: 'continue_with', // або 'signin_with'
       shape: 'rectangular',
       logo_alignment: 'left',
-      width: 300,
+      // width: 300,
     });
 
     // (Optional) One Tap prompt:
