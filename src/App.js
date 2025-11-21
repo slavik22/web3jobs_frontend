@@ -12,6 +12,7 @@ import AdminUsers from './pages/AdminUsers';
 import JobsPage from './pages/JobsPage';
 import JobDetail from './pages/JobDetail';
 import JobFormPage from './pages/JobFormPage';
+import DashboardPage from './pages/DashboardPage';
 
 
 import { clearTokens, getUser, isAuthenticated, clearUser } from './lib/auth';
@@ -21,18 +22,7 @@ export default function App() {
   const [loadingMe, setLoadingMe] = useState(true);
   const navigate = useNavigate();
 
-  // Перевіряємо локально: якщо є токени — вважаємо залогіненим,
-  // пробуємо тихий refresh (ensureAccess) і беремо user з localStorage
-
   useEffect(() => {
-    // якщо хочеш робити тихий refresh — розкоментуй:
-    // (async () => {
-    //   const hasAuth = await ensureAccess();
-    //   if (hasAuth && isAuthenticated()) setMe(getUser());
-    //   setLoadingMe(false);
-    // })();
-
-    // без тихого refresh: просто читаємо локально
     const u = getUser();
     setMe(isAuthenticated() ? u : null);
     setLoadingMe(false);
@@ -75,6 +65,7 @@ export default function App() {
                 <NavLink to="/jobs" className="btn btn-outline">Вакансії</NavLink>
                 <NavLink to={dashboardHref} className="btn btn-outline">Dashboard</NavLink>
                 <NavLink to="/profile" className="btn btn-outline">Profile</NavLink>
+                <NavLink to="/stats" className="btn btn-outline">Stats</NavLink>
                 <button onClick={logout} className="btn btn-primary">Logout</button>
               </>
             ) : (
@@ -93,6 +84,7 @@ export default function App() {
           <Route path="/register" element={<RegisterPage onAuth={(u) => setMe(u)} />} />
           <Route path="/login" element={<LoginPage onAuth={(u) => setMe(u)} />} />
 
+          <Route path="/stats" element={<DashboardPage />} />
           <Route path="/dashboard" element={<UserDashboard />} />
           <Route path="/recruiter/dashboard" element={<RecruiterDashboard />} />
           <Route path="/profile" element={<ProfilePage />} />

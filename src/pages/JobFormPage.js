@@ -12,6 +12,9 @@ const LOCATION_TYPES = ['remote', 'hybrid', 'onsite'];
 const TOKENS = ['USDC', 'ETH', 'DAI', 'USDT', 'SOL'];
 
 export default function JobFormPage() {
+
+  const BLOCKCHAINS = ['ethereum', 'polygon', 'solana', 'arbitrum', 'optimism', 'other'];
+
   const { id } = useParams();          // якщо є id — редагуємо
   const isEdit = !!id;
   const navigate = useNavigate();
@@ -29,6 +32,7 @@ export default function JobFormPage() {
     requirements: '',
     responsibilities: '',
     salary_min: '',
+    blockchain: 'ethereum',
     salary_max: '',
     salary_token: 'USDC',
     salary_usd_equivalent: '',
@@ -75,6 +79,8 @@ export default function JobFormPage() {
           required_on_chain_proof: !!j.required_on_chain_proof,
           is_active: !!j.is_active,
           escrow_contract: j.escrow_contract || '',
+          blockchain: j.blockchain || 'ethereum',   // 👈 ДОДАЛИ
+
         };
         setForm(next);
 
@@ -94,7 +100,7 @@ export default function JobFormPage() {
     try {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) return parsed.map(x => String(x)).slice(0, 30);
-    } catch {}
+    } catch { }
     // fallback — розбити за комою
     return String(raw)
       .split(',')
@@ -173,21 +179,21 @@ export default function JobFormPage() {
           <button
             type="button"
             onClick={() => setTab('basic')}
-            className={`px-3 py-2 rounded-lg border ${tab==='basic' ? 'bg-black text-white' : 'bg-white'}`}
+            className={`px-3 py-2 rounded-lg border ${tab === 'basic' ? 'bg-black text-white' : 'bg-white'}`}
           >
             Basic
           </button>
           <button
             type="button"
             onClick={() => setTab('details')}
-            className={`px-3 py-2 rounded-lg border ${tab==='details' ? 'bg-black text-white' : 'bg-white'}`}
+            className={`px-3 py-2 rounded-lg border ${tab === 'details' ? 'bg-black text-white' : 'bg-white'}`}
           >
             Details
           </button>
           <button
             type="button"
             onClick={() => setTab('web3')}
-            className={`px-3 py-2 rounded-lg border ${tab==='web3' ? 'bg-black text-white' : 'bg-white'}`}
+            className={`px-3 py-2 rounded-lg border ${tab === 'web3' ? 'bg-black text-white' : 'bg-white'}`}
           >
             Web3
           </button>
@@ -410,6 +416,22 @@ export default function JobFormPage() {
                   />
                 </div>
               )}
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="label">Блокчейн</label>
+                  <select
+                    className="input"
+                    value={form.blockchain}
+                    onChange={(e) => update('blockchain', e.target.value)}
+                  >
+                    {BLOCKCHAINS.map(x => (
+                      <option key={x} value={x}>{x}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
             </div>
           )}
 
@@ -432,6 +454,7 @@ export default function JobFormPage() {
                 <Tag icon="briefcase">{form.job_type}</Tag>
                 <Tag icon="trophy">{form.experience_level}</Tag>
                 <Tag icon="geo">{form.location_type}</Tag>
+                {form.blockchain && <Tag tone="blue">{form.blockchain}</Tag>}
                 {form.is_dao_job && <Tag tone="violet">DAO</Tag>}
                 {form.uses_escrow && <Tag tone="green">Escrow</Tag>}
                 {form.required_on_chain_proof && <Tag tone="blue">On-chain</Tag>}

@@ -303,6 +303,11 @@ export default function JobDetail() {
                       <i className="bi bi-briefcase" /> {job.job_type}
                     </Pill>
                   )}
+                  {job.blockchain && (
+                    <Pill tone="blue">
+                      <i className="bi bi-diagram-3" /> {job.blockchain}
+                    </Pill>
+                  )}
                   {job.is_dao_job && (
                     <Pill tone="indigo">
                       <i className="bi bi-people" /> DAO
@@ -397,6 +402,12 @@ export default function JobDetail() {
                     <span className="font-medium">${job.salary_usd_equivalent}</span>
                   </div>
                 ) : null}
+                {job.blockchain && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Блокчейн</span>
+                    <span className="font-medium">{job.blockchain}</span>
+                  </div>
+                )}
                 {job.skills_required ? (
                   <div className="pt-2">
                     <div className="text-gray-600 mb-1">Ключові навички</div>
@@ -411,6 +422,7 @@ export default function JobDetail() {
                     </div>
                   </div>
                 ) : null}
+
               </div>
             </div>
 
@@ -433,78 +445,78 @@ export default function JobDetail() {
         </div>
       </div>
 
-              {/* === РЕКРУТЕРСЬКИЙ БЛОК: Заявки на цю вакансію === */}
-        {apps !== null && isAuthenticated() && me?.role === 'recruiter' && (
-          <div className="rounded-2xl border bg-white p-6 mt-8">
-            <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Заявки на вакансію</h3>
-              {appsLoading && <span className="text-sm text-gray-500">Оновлення…</span>}
-            </div>
-
-            {apps.length === 0 ? (
-              <div className="text-gray-600 text-sm">Поки немає заявок.</div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full text-sm">
-                  <thead className="bg-gray-50 text-gray-600">
-                    <tr>
-                      <th className="px-4 py-2 text-left">Кандидат</th>
-                      <th className="px-4 py-2 text-left">Резюме</th>
-                      <th className="px-4 py-2 text-left">Лист</th>
-                      <th className="px-4 py-2 text-left">Статус</th>
-                      <th className="px-4 py-2 text-left">Нотатки</th>
-                      <th className="px-4 py-2 text-right">Подано</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {apps.map(app => (
-                      <tr key={app.id} className="border-t">
-                        <td className="px-4 py-2">
-                          <button
-                            className="font-medium link"
-                            onClick={() => openCandidateModal(app)}
-                            title="Переглянути профіль кандидата"
-                          >
-                            {app.candidate_name || app.user?.name || '—'}
-                          </button>
-                          <div className="text-xs text-gray-500">{app.user?.email || '—'}</div>
-                        </td>
-                        <td className="px-4 py-2">
-                          {app.resume_url ? (
-                            <a href={app.resume_url} className="link" target="_blank" rel="noreferrer">Відкрити</a>
-                          ) : '—'}
-                        </td>
-                        <td className="px-4 py-2 max-w-[360px]">
-                          <div className="line-clamp-3 whitespace-pre-wrap text-gray-800">
-                            {app.cover_letter || '—'}
-                          </div>
-                        </td>
-                        <td className="px-4 py-2">
-                          <div className="flex items-center gap-2">
-                            <StatusBadge status={app.status} />
-                            <StatusSelect
-                              value={app.status}
-                              onChange={(val) => updateAppStatus(app.id, val)}
-                              disabled={updatingId === app.id}
-                            />
-                          </div>
-                        </td>
-                        <td className="px-4 py-2">
-                          <button className="btn btn-ghost btn-sm" onClick={() => openNote(app)}>
-                            {app.recruiter_notes ? 'Редагувати' : 'Додати'}
-                          </button>
-                        </td>
-                        <td className="px-4 py-2 text-right text-gray-600">
-                          {app.applied_at ? new Date(app.applied_at).toLocaleString('uk-UA') : '—'}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+      {/* === РЕКРУТЕРСЬКИЙ БЛОК: Заявки на цю вакансію === */}
+      {apps !== null && isAuthenticated() && me?.role === 'recruiter' && (
+        <div className="rounded-2xl border bg-white p-6 mt-8">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Заявки на вакансію</h3>
+            {appsLoading && <span className="text-sm text-gray-500">Оновлення…</span>}
           </div>
-        )}
+
+          {apps.length === 0 ? (
+            <div className="text-gray-600 text-sm">Поки немає заявок.</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead className="bg-gray-50 text-gray-600">
+                  <tr>
+                    <th className="px-4 py-2 text-left">Кандидат</th>
+                    <th className="px-4 py-2 text-left">Резюме</th>
+                    <th className="px-4 py-2 text-left">Лист</th>
+                    <th className="px-4 py-2 text-left">Статус</th>
+                    <th className="px-4 py-2 text-left">Нотатки</th>
+                    <th className="px-4 py-2 text-right">Подано</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {apps.map(app => (
+                    <tr key={app.id} className="border-t">
+                      <td className="px-4 py-2">
+                        <button
+                          className="font-medium link"
+                          onClick={() => openCandidateModal(app)}
+                          title="Переглянути профіль кандидата"
+                        >
+                          {app.candidate_name || app.user?.name || '—'}
+                        </button>
+                        <div className="text-xs text-gray-500">{app.user?.email || '—'}</div>
+                      </td>
+                      <td className="px-4 py-2">
+                        {app.resume_url ? (
+                          <a href={app.resume_url} className="link" target="_blank" rel="noreferrer">Відкрити</a>
+                        ) : '—'}
+                      </td>
+                      <td className="px-4 py-2 max-w-[360px]">
+                        <div className="line-clamp-3 whitespace-pre-wrap text-gray-800">
+                          {app.cover_letter || '—'}
+                        </div>
+                      </td>
+                      <td className="px-4 py-2">
+                        <div className="flex items-center gap-2">
+                          <StatusBadge status={app.status} />
+                          <StatusSelect
+                            value={app.status}
+                            onChange={(val) => updateAppStatus(app.id, val)}
+                            disabled={updatingId === app.id}
+                          />
+                        </div>
+                      </td>
+                      <td className="px-4 py-2">
+                        <button className="btn btn-ghost btn-sm" onClick={() => openNote(app)}>
+                          {app.recruiter_notes ? 'Редагувати' : 'Додати'}
+                        </button>
+                      </td>
+                      <td className="px-4 py-2 text-right text-gray-600">
+                        {app.applied_at ? new Date(app.applied_at).toLocaleString('uk-UA') : '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
       {/* Modal: recruiter notes */}
       {editingNoteId !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
@@ -530,141 +542,141 @@ export default function JobDetail() {
       )}
 
       {/* Modal: Candidate details */}
-{candidateModalOpen && selectedApp && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-    <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-xl">
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-lg font-semibold">
-          Кандидат: {selectedApp.candidate_name || selectedApp.user?.name || '—'}
-        </h3>
-        <button className="btn btn-ghost btn-sm" onClick={closeCandidateModal}>✕</button>
-      </div>
+      {candidateModalOpen && selectedApp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-semibold">
+                Кандидат: {selectedApp.candidate_name || selectedApp.user?.name || '—'}
+              </h3>
+              <button className="btn btn-ghost btn-sm" onClick={closeCandidateModal}>✕</button>
+            </div>
 
-      {/* Шапка з базовими даними */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-xl border p-4">
-          <div className="text-xs text-gray-500">Емейл</div>
-          <div className="font-medium">{selectedApp.user?.email || '—'}</div>
-        </div>
-        <div className="rounded-xl border p-4">
-          <div className="text-xs text-gray-500">Подано</div>
-          <div className="font-medium">
-            {selectedApp.applied_at ? new Date(selectedApp.applied_at).toLocaleString('uk-UA') : '—'}
-          </div>
-        </div>
-        <div className="rounded-xl border p-4">
-          <div className="text-xs text-gray-500">Статус</div>
-          <div className="font-medium">{selectedApp.status || '—'}</div>
-        </div>
-        <div className="rounded-xl border p-4">
-          <div className="text-xs text-gray-500">Резюме</div>
-          <div className="font-medium">
-            {selectedApp.resume_url
-              ? <a href={selectedApp.resume_url} className="link" target="_blank" rel="noreferrer">Відкрити</a>
-              : '—'}
-          </div>
-        </div>
-      </div>
-
-      {/* Супровідний лист */}
-      <div className="mt-4">
-        <div className="text-xs text-gray-500">Супровідний лист</div>
-        <pre className="whitespace-pre-wrap text-sm bg-gray-50 rounded-xl border p-3">
-          {selectedApp.cover_letter || '—'}
-        </pre>
-      </div>
-
-      {/* Рекрутерські нотатки (read-only у цій модалці; редагування як і раніше у таблиці) */}
-      {selectedApp.recruiter_notes ? (
-        <div className="mt-4">
-          <div className="text-xs text-gray-500">Внутрішні нотатки</div>
-          <pre className="whitespace-pre-wrap text-sm bg-amber-50 rounded-xl border p-3">
-            {selectedApp.recruiter_notes}
-          </pre>
-        </div>
-      ) : null}
-
-      {/* Розширені дані, якщо підтягнули */}
-      <div className="mt-6">
-        <div className="mb-2 flex items-center gap-2">
-          <h4 className="font-semibold">Профіль кандидата</h4>
-          {candidateLoading && <span className="text-xs text-gray-500">Завантаження…</span>}
-        </div>
-
-        {(candidateDetails && Object.keys(candidateDetails).length > 0) ? (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {candidateDetails.full_name && (
-              <div className="rounded-xl border p-3">
-                <div className="text-xs text-gray-500">Повне ім’я</div>
-                <div className="font-medium">{candidateDetails.full_name}</div>
+            {/* Шапка з базовими даними */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-xl border p-4">
+                <div className="text-xs text-gray-500">Емейл</div>
+                <div className="font-medium">{selectedApp.user?.email || '—'}</div>
               </div>
-            )}
-            {candidateDetails.phone && (
-              <div className="rounded-xl border p-3">
-                <div className="text-xs text-gray-500">Телефон</div>
-                <div className="font-medium">{candidateDetails.phone}</div>
-              </div>
-            )}
-            {candidateDetails.location && (
-              <div className="rounded-xl border p-3">
-                <div className="text-xs text-gray-500">Локація</div>
-                <div className="font-medium">{candidateDetails.location}</div>
-              </div>
-            )}
-            {candidateDetails.github && (
-              <div className="rounded-xl border p-3">
-                <div className="text-xs text-gray-500">GitHub</div>
-                <a className="link font-medium" href={candidateDetails.github} target="_blank" rel="noreferrer">
-                  {candidateDetails.github}
-                </a>
-              </div>
-            )}
-            {candidateDetails.linkedin && (
-              <div className="rounded-xl border p-3">
-                <div className="text-xs text-gray-500">LinkedIn</div>
-                <a className="link font-medium" href={candidateDetails.linkedin} target="_blank" rel="noreferrer">
-                  {candidateDetails.linkedin}
-                </a>
-              </div>
-            )}
-            {candidateDetails.portfolio && (
-              <div className="rounded-xl border p-3">
-                <div className="text-xs text-gray-500">Портфоліо</div>
-                <a className="link font-medium" href={candidateDetails.portfolio} target="_blank" rel="noreferrer">
-                  {candidateDetails.portfolio}
-                </a>
-              </div>
-            )}
-            {candidateDetails.skills?.length ? (
-              <div className="sm:col-span-2 rounded-xl border p-3">
-                <div className="text-xs text-gray-500">Навички</div>
-                <div className="mt-1 flex flex-wrap gap-2">
-                  {candidateDetails.skills.split(',').map((s, i) => (
-                    <span key={i} className="rounded bg-gray-100 px-2 py-1 text-xs">{s.trim()}</span>
-                  ))}
+              <div className="rounded-xl border p-4">
+                <div className="text-xs text-gray-500">Подано</div>
+                <div className="font-medium">
+                  {selectedApp.applied_at ? new Date(selectedApp.applied_at).toLocaleString('uk-UA') : '—'}
                 </div>
               </div>
-            ) : null}
-            {candidateDetails.bio && (
-              <div className="sm:col-span-2">
-                <div className="text-xs text-gray-500">Біо</div>
-                <p className="mt-1 whitespace-pre-wrap">{candidateDetails.bio}</p>
+              <div className="rounded-xl border p-4">
+                <div className="text-xs text-gray-500">Статус</div>
+                <div className="font-medium">{selectedApp.status || '—'}</div>
               </div>
-            )}
-          </div>
-        ) : (
-          <div className="text-sm text-gray-500">
-            Додаткових даних немає. Показано інформацію із заявки.
-          </div>
-        )}
-      </div>
+              <div className="rounded-xl border p-4">
+                <div className="text-xs text-gray-500">Резюме</div>
+                <div className="font-medium">
+                  {selectedApp.resume_url
+                    ? <a href={selectedApp.resume_url} className="link" target="_blank" rel="noreferrer">Відкрити</a>
+                    : '—'}
+                </div>
+              </div>
+            </div>
 
-      <div className="mt-6 flex justify-end">
-        <button className="btn btn-ghost" onClick={closeCandidateModal}>Закрити</button>
-      </div>
-    </div>
-  </div>
-)}
+            {/* Супровідний лист */}
+            <div className="mt-4">
+              <div className="text-xs text-gray-500">Супровідний лист</div>
+              <pre className="whitespace-pre-wrap text-sm bg-gray-50 rounded-xl border p-3">
+                {selectedApp.cover_letter || '—'}
+              </pre>
+            </div>
+
+            {/* Рекрутерські нотатки (read-only у цій модалці; редагування як і раніше у таблиці) */}
+            {selectedApp.recruiter_notes ? (
+              <div className="mt-4">
+                <div className="text-xs text-gray-500">Внутрішні нотатки</div>
+                <pre className="whitespace-pre-wrap text-sm bg-amber-50 rounded-xl border p-3">
+                  {selectedApp.recruiter_notes}
+                </pre>
+              </div>
+            ) : null}
+
+            {/* Розширені дані, якщо підтягнули */}
+            <div className="mt-6">
+              <div className="mb-2 flex items-center gap-2">
+                <h4 className="font-semibold">Профіль кандидата</h4>
+                {candidateLoading && <span className="text-xs text-gray-500">Завантаження…</span>}
+              </div>
+
+              {(candidateDetails && Object.keys(candidateDetails).length > 0) ? (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {candidateDetails.full_name && (
+                    <div className="rounded-xl border p-3">
+                      <div className="text-xs text-gray-500">Повне ім’я</div>
+                      <div className="font-medium">{candidateDetails.full_name}</div>
+                    </div>
+                  )}
+                  {candidateDetails.phone && (
+                    <div className="rounded-xl border p-3">
+                      <div className="text-xs text-gray-500">Телефон</div>
+                      <div className="font-medium">{candidateDetails.phone}</div>
+                    </div>
+                  )}
+                  {candidateDetails.location && (
+                    <div className="rounded-xl border p-3">
+                      <div className="text-xs text-gray-500">Локація</div>
+                      <div className="font-medium">{candidateDetails.location}</div>
+                    </div>
+                  )}
+                  {candidateDetails.github && (
+                    <div className="rounded-xl border p-3">
+                      <div className="text-xs text-gray-500">GitHub</div>
+                      <a className="link font-medium" href={candidateDetails.github} target="_blank" rel="noreferrer">
+                        {candidateDetails.github}
+                      </a>
+                    </div>
+                  )}
+                  {candidateDetails.linkedin && (
+                    <div className="rounded-xl border p-3">
+                      <div className="text-xs text-gray-500">LinkedIn</div>
+                      <a className="link font-medium" href={candidateDetails.linkedin} target="_blank" rel="noreferrer">
+                        {candidateDetails.linkedin}
+                      </a>
+                    </div>
+                  )}
+                  {candidateDetails.portfolio && (
+                    <div className="rounded-xl border p-3">
+                      <div className="text-xs text-gray-500">Портфоліо</div>
+                      <a className="link font-medium" href={candidateDetails.portfolio} target="_blank" rel="noreferrer">
+                        {candidateDetails.portfolio}
+                      </a>
+                    </div>
+                  )}
+                  {candidateDetails.skills?.length ? (
+                    <div className="sm:col-span-2 rounded-xl border p-3">
+                      <div className="text-xs text-gray-500">Навички</div>
+                      <div className="mt-1 flex flex-wrap gap-2">
+                        {candidateDetails.skills.split(',').map((s, i) => (
+                          <span key={i} className="rounded bg-gray-100 px-2 py-1 text-xs">{s.trim()}</span>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+                  {candidateDetails.bio && (
+                    <div className="sm:col-span-2">
+                      <div className="text-xs text-gray-500">Біо</div>
+                      <p className="mt-1 whitespace-pre-wrap">{candidateDetails.bio}</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-sm text-gray-500">
+                  Додаткових даних немає. Показано інформацію із заявки.
+                </div>
+              )}
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <button className="btn btn-ghost" onClick={closeCandidateModal}>Закрити</button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
